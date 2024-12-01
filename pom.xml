@@ -43,6 +43,10 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <name>demo-bellsoft-buildpack</name>
+                        <builder>bellsoft/buildpacks.builder:musl</builder>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
