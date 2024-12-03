@@ -1,12 +1,7 @@
 name: ci-flow
 
 on:
-  workflow_dispatch:
-  # only push to devt branch creates and pushes an image
   push:
-    branches:
-      - 'devt'
-
 
 env:
   REGISTRY: ghcr.io
@@ -31,9 +26,19 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Test with Maven
-        run: |
-          mvn -q clean test 
+      - name: Build with Maven
+        run: mvn -q --batch-mode clean package
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=sha,format=long,prefix=
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -45,17 +50,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push with Maven
-        run: |
-          SHORTSHA=${GITHUB_SHA::7}
-          mvn -q -Dmaven.test.skip=true clean spring-boot:build-image \
-            -Dspring-boot.build-image.publish=false \
-            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}-${SHORTSHA} \
-            -Ddocker.publishRegistry.username=${{ github.actor }} \
-            -Ddocker.publishRegistry.password=${{ secrets.GITHUB_TOKEN }} \
-            -Ddocker.publishRegistry.url=https://${{ env.REGISTRY }}
-  
-          docker push ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}-${SHORTSHA}
+      - name: Build image and push
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
 #      - uses: EndBug/add-and-commit@v7
 #        with:
