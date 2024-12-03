@@ -50,7 +50,7 @@ jobs:
           SHORTSHA=${GITHUB_SHA::7}
           mvn -Dmaven.test.skip=true clean spring-boot:build-image \
             -Dspring-boot.build-image.publish=true \
-            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ github.actor }}:${{ github.ref_name }}-${SHORTSHA}
+            -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}-${SHORTSHA}
       
 
       - uses: EndBug/add-and-commit@v7
