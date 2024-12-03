@@ -44,7 +44,6 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>demo-bellsoft-buildpack</name>
                         <builder>bellsoft/buildpacks.builder:musl</builder>
                     </image>
                     <excludes>
